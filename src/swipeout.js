@@ -1,36 +1,6 @@
 import React, { PureComponent } from "react"
 import { View, Text, StyleSheet, PanResponder } from "react-native"
 
-//通过方法创建实例触摸事件
-const panResponderCreate = function(
-    onPanResponderGrant,
-    onPanResponderMove,
-    onPanResponderRelease
-) {
-    return PanResponder.create({
-        // 要求成为响应者：
-        onStartShouldSetPanResponder: (evt, gestureState) => true,
-        onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-        onMoveShouldSetPanResponder: (evt, gestureState) => true,
-        onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-
-        onPanResponderGrant: (evt, gestureState) =>
-            onPanResponderGrant(evt, gestureState),
-
-        onPanResponderMove: (evt, gestureState) =>
-            onPanResponderMove(evt, gestureState),
-
-        onPanResponderTerminationRequest: (evt, gestureState) => true,
-        onPanResponderRelease: (evt, gestureState) =>
-            onPanResponderRelease(evt, gestureState),
-
-        onPanResponderTerminate: (evt, gestureState) => {},
-        onShouldBlockNativeResponder: (evt, gestureState) => {
-            return true
-        }
-    })
-}
-
 //定义默认可以划开最大距离
 let distance = 80
 export default class extends PureComponent {
@@ -47,11 +17,25 @@ export default class extends PureComponent {
         this.isSetMoveX = true
     }
     init() {
-        this.panResponder = panResponderCreate(
-            (evt, gestureState) => this.onPanResponderGrant(evt, gestureState),
-            (evt, gestureState) => this.onPanResponderMove(evt, gestureState),
-            (evt, gestureState) => this.onPanResponderRelease(evt, gestureState)
-        )
+        //通过方法创建实例触摸事件
+        this.panResponder = PanResponder.create({
+            // 要求成为响应者：
+            onStartShouldSetPanResponder: (evt, gestureState) => true,
+            onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+            onMoveShouldSetPanResponder: (evt, gestureState) => true,
+            onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+            onPanResponderGrant: (evt, gestureState) =>
+                this.onPanResponderGrant(evt, gestureState),
+            onPanResponderMove: (evt, gestureState) =>
+                this.onPanResponderMove(evt, gestureState),
+            onPanResponderTerminationRequest: (evt, gestureState) => true,
+            onPanResponderRelease: (evt, gestureState) =>
+                this.onPanResponderRelease(evt, gestureState),
+            onPanResponderTerminate: (evt, gestureState) => {},
+            onShouldBlockNativeResponder: (evt, gestureState) => {
+                return true
+            }
+        })
     }
     onPanResponderGrant(evt, gestureState) {
         if (this.props.onOpen) {
@@ -62,10 +46,11 @@ export default class extends PureComponent {
         this.isSetMoveX = true
     }
     onPanResponderMove(evt, gestureState) {
-        let { moveX, x0, moveY, y0 } = gestureState
-        let mx = Math.ceil(moveX - this.lastMoveX)
-        let limt = this.limt + mx
-        if (mx != 0) {
+        if (this.isSetMoveX) {
+            this.isSetMoveX = false
+            let { moveX, x0, moveY, y0 } = gestureState
+            let mx = Math.floor(moveX - this.lastMoveX)
+            let limt = this.limt + mx
             let setMovex = mx
             if (limt < -distance) {
                 setMovex = -distance - this.limt
@@ -77,14 +62,12 @@ export default class extends PureComponent {
                     this.props.onClose()
                 }
             }
-            if (this.isSetMoveX) {
-                this.isSetMoveX = false
-                this.timeoutMovex = setTimeout(() => {
-                    this.isSetMoveX = true
-                    this.setState({ moveX: setMovex })
-                    this.lastMoveX = moveX
-                }, 50)
-            }
+
+            this.timeoutMovex = setTimeout(() => {
+                this.isSetMoveX = true
+                this.setState({ moveX: setMovex })
+                this.lastMoveX = moveX
+            }, 50)
         }
     }
     onPanResponderRelease(evt, gestureState) {
@@ -122,11 +105,19 @@ export default class extends PureComponent {
     render() {
         let { children, onPress, actionBtn, style, ...props } = this.props
         let { moveX } = this.state
-        this.transform = [{ translateX: this.limt }, { translateX: moveX }]
-        this.limt = this.limt + moveX
+        if (this.props.isSwipeout) {
+            this.transform = [{ translateX: this.limt }, { translateX: moveX }]
+            this.limt = this.limt + moveX
+        } else {
+            this.transform = [{ translateX: 0 }]
+            this.limt = 0
+        }
+
         return (
-            <View {...this.panResponder.panHandlers} {...props}>
+            <View style={styles.container}>
                 <View
+                    {...this.panResponder.panHandlers}
+                    {...props}
                     style={{
                         ...style,
                         ...styles.item,
@@ -142,6 +133,9 @@ export default class extends PureComponent {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        position: "relative"
+    },
     item: {
         zIndex: 2,
         backgroundColor: "#fff"
