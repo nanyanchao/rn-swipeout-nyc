@@ -1,18 +1,19 @@
 {
     "name": "rn-swipeout-nyc",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "description": "react native swipeout",
-    "main": "lib/index.js",
-    "module": "lib/index.js",
-    "scripts": {
-        "compile": "babel src -d lib",
-        "prepublish": "npm run compile"
-    },
+    "main": "src/index.js",
+    "module": "src/index.js",
+    "scripts": {},
     "keywords": [
         "react",
         "native",
         "swipeout"
     ],
+    "bugs": {
+        "url": "https://github.com/nanyanchao/rn-swipeout-nyc/issues"
+    },
+    "homepage": "https://github.com/nanyanchao/nrn-swipeout-nyc#readme",
     "author": "xiaolan",
     "license": "ISC"
 }
