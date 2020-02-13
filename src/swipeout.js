@@ -133,7 +133,6 @@ export default class extends PureComponent {
                         transform: [...this.transform]
                     }}
                 >
-                    <Text>{this.state.moveX}</Text>
                     {children}
                 </View>
                 <View style={styles.action}>{actionBtn}</View>
