@@ -103,9 +103,16 @@ export default class extends PureComponent {
         }
     }
     render() {
-        let { children, onPress, actionBtn, style, ...props } = this.props
+        let {
+            children,
+            onPress,
+            actionBtn,
+            style,
+            isSwipeout = true,
+            ...props
+        } = this.props
         let { moveX } = this.state
-        if (this.props.isSwipeout) {
+        if (isSwipeout) {
             this.transform = [{ translateX: this.limt }, { translateX: moveX }]
             this.limt = this.limt + moveX
         } else {
